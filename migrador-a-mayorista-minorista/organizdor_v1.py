@@ -1,4 +1,5 @@
 import json
+import os
 
 #######
 # TODO
@@ -101,3 +102,4 @@ cuentas_ok.close()
 # Escribo el nuevo archivo de cuentas
 with open("cuentaNuevo.json", "w") as jsonFile:
     json.dump(cuentas, jsonFile)
+os.system("pause")
