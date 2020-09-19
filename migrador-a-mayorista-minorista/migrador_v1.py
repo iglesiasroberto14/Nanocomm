@@ -1,10 +1,15 @@
 import json
-import time
-from pprint import pprint
+
 #######
 # TODO
-# RECEPTORA Y LINEA
+# Varios Cod Panel
 ########
+
+def xstr(s):
+    if s is None:
+        return ''
+    return str(s)
+
 
 # Aca voy a guardar la relacion idCom - idMinorista
 idcom_idmin = {}
@@ -32,9 +37,9 @@ with open('minorista.json') as minoristaJSON:
             while j <= domcodpanel_len:
                 concat=minorista_domid[i*4-3:i*4-1]+minorista_domcodpanel[j*4-3:j*4-1]+minorista_receptor+minorista_linea
                 idcom_idmin[concat]=minorista_id
+                print("Aca: "+concat+','+str(idcom_idmin[concat]))
                 j += 1
             i += 1
-
         idcom_idmin[minorista_id]=[dom_id,dom_codpanel]
 
 cuentas_error = open('cuentas_sin_minorista.txt','w')
@@ -46,21 +51,42 @@ with open('cuenta.json') as cuentasJSON:
     i,j,k=0,0,0
     for comunicador in cuentas:
         i+=1
-        try:
-            cuentas_ok.write(str(idcom_idmin[comunicador["idComunicador"][:2]+comunicador["codPanel"][:2]+comunicador["receptorTel"]+comunicador["lineaTel"]])+','+comunicador["idComunicador"]+'\n')
-            j+=1
-        except:
-            print('No existe la combinacion de dominios, receptora y linea: "' + comunicador["idComunicador"][:2] + comunicador["codPanel"][:2] + comunicador["receptorTel"] + comunicador["lineaTel"] +'". ID Comunicador: ' + comunicador["idComunicador"] + ', Codigo de Panel: ' + comunicador["codPanel"][:2])
-            cuentas_error.write(str(comunicador["idComunicador"][:2]+comunicador["codPanel"][:2])+'\n')
-            k+=1
+        cod_panel=xstr(comunicador["codPanel"])+xstr(comunicador["codPanel2"])+xstr(comunicador["codPanel3"])+xstr(comunicador["codPanel4"])+xstr(comunicador["codPanel5"])+xstr(comunicador["codPanel6"])+xstr(comunicador["codPanel7"])+xstr(comunicador["codPanel8"])
+        if (len(cod_panel) > 4):
+            m=1
+            try:
+                id_minorista=str(idcom_idmin[comunicador["idComunicador"][:2]+cod_panel[m*4-4:m*4-2]+comunicador["receptorTel"]+comunicador["lineaTel"]])
+            except:
+                print("1No encontre la combinacion de dominios, receptora y linea: "+comunicador["idComunicador"][:2]+cod_panel[m*4-4:m*4-2]+comunicador["receptorTel"]+comunicador["lineaTel"]+". Cuenta: "+comunicador["idComunicador"])
+                continue
+            while (m<len(cod_panel)/4):
+                print(comunicador["idComunicador"][:2]+cod_panel[m*4-4:m*4-2]+comunicador["receptorTel"]+comunicador["lineaTel"])
+                try:
+                    id_minorista_nuevo=str(idcom_idmin[comunicador["idComunicador"][:2]+cod_panel[m*4-4:m*4-2]+comunicador["receptorTel"]+comunicador["lineaTel"]])
+                    if (id_minorista_nuevo != id_minorista):
+                        print("Cambio el ID minorista, saliendo")
+                        break
+                except:
+                    print("2No encontre la combinacion de dominios, receptora y linea: "+comunicador["idComunicador"][:2]+cod_panel[m*4-4:m*4-2]+comunicador["receptorTel"]+comunicador["lineaTel"]+". Cuenta: "+comunicador["idComunicador"])
+                    break
+                m+=1
+        else:
+            try:
+                cuentas_ok.write(str(idcom_idmin[comunicador["idComunicador"][:2]+comunicador["codPanel"][:2]+comunicador["receptorTel"]+comunicador["lineaTel"]])+','+comunicador["idComunicador"]+'\n')
+                j+=1
+            except:
+                print('3No encontre la combinacion de dominios, receptora y linea: ' + comunicador["idComunicador"][:2] + comunicador["codPanel"][:2] + comunicador["receptorTel"] + comunicador["lineaTel"] +". Cuenta: "+comunicador["idComunicador"])
+                cuentas_error.write(str(comunicador["idComunicador"])+'\n')
+                k+=1
 print('Total de cuentas: ' + str(i))
 print('Cuentas asignadas a un minorista: ' + str(j))
 print('Cuentas sin un mayorista: ' + str(k))
 
+# Cierro los archivos de log
 cuentas_ok.close()
 cuentas_error.close()
 
-# Abro archivo de cuentas
+# Abro archivo de cuentas modificarlo y escribir el nuevo
 with open('cuenta.json') as cuentasJSON:
     cuentas = json.load(cuentasJSON)
     for comunicador in cuentas:
@@ -72,6 +98,6 @@ with open('cuenta.json') as cuentasJSON:
 
 cuentas_ok.close()
 
+# Escribo el nuevo archivo de cuentas
 with open("cuentaNuevo.json", "w") as jsonFile:
     json.dump(cuentas, jsonFile)
-            
