@@ -1,0 +1,26 @@
+Los datos de la cuenta
+
+ID Comunicador
+Cod Panel
+Rec: se puede modificar
+Linea: se puede modificar
+
+
+
+Modo_1:
+No se modifica ningun dato de la cuenta.
+Entradas:
+ - Receptor Standard
+   - minoristas.json
+     - Dominio ID de comunicador
+     - Y/O Cod cuenta panel
+
+Modo_2:
+Se modifican cuentas.
+Entradas:
+ - Receptor Standard
+   - minoristas.json
+     - Dominio ID de comunicador
+     - Rec y Linea
+   + Si coincide Dom ID de Com -> Modifico  la cuenta con rec y linea
+
